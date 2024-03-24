@@ -1,16 +1,28 @@
-#!/usr/bin/env nextflow
+#!/usr/bin/env nexflow
 
-process sayHello {
-  input: 
-    val x
-  output:
-    stdout
+/*
+* Insert the default parameters
+*/
+
+params.reads = "${baseDir}/toy_data/*.fastq.gz"
+
+/*
+* Perform the fastqc
+*/
+
+process fastqc {
+
+  input:
+  path read
+
   script:
-    """
-    echo '$x world!'
-    """
+  """
+  # echo "Percorso del file di input: ${read}" > "${baseDir}/results/prova.txt"
+  fastqc ${read} --outdir="${baseDir}/results"
+  """
 }
 
 workflow {
-  Channel.of('Bonjour PROVA', 'Ciao PROVA', 'Hello', 'Hola') | sayHello | view
+  reads_ch = Channel.fromPath(params.reads)
+  fastqc_results = fastqc(reads_ch)
 }
